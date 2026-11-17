@@ -1,0 +1,19 @@
+cff-version: 1.2.0
+message: "If you use this software, please cite the associated paper."
+title: "NeuroPulse: reference implementation, tests and figure scripts"
+type: software
+version: 1.0.0
+date-released: 2026-11-16
+authors:
+  - family-names: Jyothi
+    given-names: Jeevana
+    affiliation: "School of Computer Science and Engineering, Vellore Institute of Technology (VIT-AP), Amaravati, India"
+  - family-names: Bikku
+    given-names: Thulasi
+    affiliation: "Department of Computer Science and Engineering, Amrita School of Computing, Amrita Vishwa Vidyapeetham, Amaravati, India"
+repository-code: "https://github.com/thulasi-bikku/NeuroPulse"
+abstract: "Reference implementation of the NeuroPulse input contract, evaluation metrics, a consistency check of the reported results, and scripts that regenerate the figures of the associated manuscript. All data are synthetic; nothing here measures brain activity or emotion."
+keywords:
+  - affective computing
+  - synthetic data
+  - reproducibility

@@ -1,0 +1,84 @@
+== Split sizes ==
+[PASS] train + validation + test = total 
+[PASS] test size = 5 x per-class support 
+
+== Single-run accuracy from error counts ==
+[PASS] CNN: accuracy 96.267 matches printed 96.267 (361/375)
+[PASS] CNN: rows sum to class support 
+[PASS] CNN-attention: accuracy 97.600 matches printed 97.600 (366/375)
+[PASS] CNN-attention: rows sum to class support 
+[PASS] MLP: accuracy 96.000 matches printed 96.000 (360/375)
+[PASS] MLP: rows sum to class support 
+[PASS] RBF-SVM: accuracy 97.867 matches printed 97.867 (367/375)
+[PASS] RBF-SVM: rows sum to class support 
+
+== CNN-attention per-class metrics (Table 5) ==
+[PASS] ANGRY: P/R/F1 = 0.9459/0.9333/0.9396 
+[PASS] CALM: P/R/F1 = 1.0000/1.0000/1.0000 
+[PASS] FEAR: P/R/F1 = 0.9342/0.9467/0.9404 
+[PASS] HAPPY: P/R/F1 = 1.0000/1.0000/1.0000 
+[PASS] SAD: P/R/F1 = 1.0000/1.0000/1.0000 
+[PASS] macro precision = 0.9760 
+[PASS] macro recall = 0.9760 
+[PASS] macro f1 = 0.9760 
+[PASS] macro balanced_accuracy = 0.9760 
+
+== Bootstrap interval endpoints are attainable accuracies (multiples of 1/375) ==
+[PASS] 96.00% = 360/375 
+[PASS] 98.93% = 371/375 
+
+== Perturbation and ablation accuracies correspond to whole records ==
+[PASS] Unpermuted: 97.6% = 366/375 
+[PASS] Channel order A: 97.33% = 365/375 
+[PASS] Channel order B: 97.07% = 364/375 
+[PASS] Channel order C: 97.07% = 364/375 
+[PASS] Descriptors reversed: 28.0% = 105/375 
+[PASS] Descriptors shifted: 21.6% = 81/375 
+[PASS] Descriptors mixed: 1.33% = 5/375 
+[PASS] No TP9: 93.6% = 351/375 
+[PASS] No AF7: 95.733% = 359/375 
+[PASS] No AF8: 94.4% = 354/375 
+[PASS] No TP10: 95.2% = 357/375 
+[PASS] every single-row-removal accuracy is below the 97.60% reference 
+
+== Calibration arithmetic ==
+[PASS] ECE 0.0212 >= |mean confidence - accuracy| = 0.0199 
+       derived: mean top score of the 9 wrong predictions is at least 0.829
+[PASS] lower bound on error confidence is below 1 
+
+== Seed summary ==
+       SVM minus CNN-attention mean accuracy = 0.534 pp = 2.00 test records
+[PASS] SVM seed mean equals its single-run accuracy 
+       one test record = 0.2667 pp (CNN-attention SD = 0.267 pp)
+
+== Derived per-class metrics for all models (cf. Table 7) ==
+model, class, precision, recall, F1
+CNN, ANGRY, 0.8961, 0.9200, 0.9079
+CNN, FEAR, 0.9178, 0.8933, 0.9054
+CNN, macro, P=0.9628, R=0.9627, F1=0.9627
+CNN-attention, ANGRY, 0.9459, 0.9333, 0.9396
+CNN-attention, FEAR, 0.9342, 0.9467, 0.9404
+CNN-attention, macro, P=0.9760, R=0.9760, F1=0.9760
+MLP, ANGRY, 0.9286, 0.8667, 0.8966
+MLP, FEAR, 0.8750, 0.9333, 0.9032
+MLP, macro, P=0.9607, R=0.9600, F1=0.9600
+RBF-SVM, ANGRY, 0.9855, 0.9067, 0.9444
+RBF-SVM, FEAR, 0.9136, 0.9867, 0.9487
+RBF-SVM, macro, P=0.9798, R=0.9787, F1=0.9786
+
+== Exact (Clopper-Pearson) and Wilson 95% intervals from test counts (Table 7) ==
+CNN: 361/375  CP [93.82, 97.94]  Wilson [93.83, 97.76]
+CNN-attention: 366/375  CP [95.49, 98.90]  Wilson [95.50, 98.73]
+MLP: 360/375  CP [93.49, 97.74]  Wilson [93.51, 97.56]
+RBF-SVM: 367/375  CP [95.84, 99.07]  Wilson [95.85, 98.92]
+
+== Parameter accounting ==
+[PASS] CNN-attention total parameters = 42,821 
+       MLP (28-128-64-5) parameters = 12,293
+       learned Q/K/V projections of width 128 would add 49,536 parameters, giving 92,357
+[PASS] reported total excludes learned Q/K/V projections 
+
+== Below-chance accuracy under the mixed descriptor order ==
+       5/375 correct against a chance rate of 0.20: one-sided exact p = 2.83e-29
+
+All consistency checks passed.
