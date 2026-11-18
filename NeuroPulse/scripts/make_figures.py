@@ -338,6 +338,114 @@ def fig_ablation(formats, dpi):
     save(fig, "fig_channel_ablation", formats, dpi)
 
 
+# ---------------------------------------------------------- supplementary-experiment figures
+SUPP_COLOURS = {"RBF-SVM": "#CC79A7", "Logistic regression": "#999999", "k-NN (k = 5)": "#E69F00",
+                "MLP": "#009E73", "Random forest": "#0072B2", "Gradient boosting": "#D55E00"}
+
+
+def load_supp():
+    import json
+
+    path = ROOT / "docs" / "supplementary_results.json"
+    return json.loads(path.read_text()) if path.exists() else None
+
+
+def fig_supp_baselines(res, formats, dpi):
+    e1 = res["E1_baselines"]
+    names = list(e1)
+    fig, ax = plt.subplots(figsize=(FULL_WIDTH, 3.4))
+    rng = np.random.default_rng(0)
+    for i, n in enumerate(names):
+        vals = np.array(e1[n]["acc"]["values"])
+        ax.scatter(i + rng.uniform(-0.12, 0.12, len(vals)), vals, s=20, color=SUPP_COLOURS[n], alpha=0.75,
+                   edgecolor="white", linewidth=0.5, zorder=3)
+        m, sd = e1[n]["acc"]["mean"], e1[n]["acc"]["sd"]
+        ax.errorbar(i, m, yerr=sd, fmt="D", color=DARK, markerfacecolor="white", markersize=6, capsize=5,
+                    elinewidth=1.4, zorder=4)
+    ax.set_xticks(range(len(names)), [n.replace(" (k = 5)", "\n(k = 5)").replace(" ", "\n", 1) if len(n) > 12 else n
+                                      for n in names])
+    ax.set_ylabel("Test accuracy (%)")
+    ax.yaxis.grid(True, color="#dddddd", linewidth=0.7)
+    ax.set_axisbelow(True)
+    ax.text(0.995, 0.02, f"{res['meta']['replicates']} replicates; diamond: mean \u00b1 SD", transform=ax.transAxes,
+            ha="right", va="bottom", fontsize=8, color=GREY)
+    save(fig, "fig_supp_baselines", formats, dpi)
+
+
+def fig_supp_sweep(res, formats, dpi):
+    e2 = res["E2_sweep"]
+    fig, ax = plt.subplots(figsize=(FULL_WIDTH, 3.4))
+    for n, d in e2.items():
+        xs = [float(k) for k in d]
+        m = np.array([d[k]["mean"] for k in d])
+        sd = np.array([d[k]["sd"] for k in d])
+        ax.plot(xs, m, marker="o", ms=4.5, lw=1.6, color=SUPP_COLOURS[n], label=n)
+        ax.fill_between(xs, m - sd, m + sd, color=SUPP_COLOURS[n], alpha=0.15, linewidth=0)
+    ax.axhline(20, color=DARK, linestyle="--", linewidth=0.9)
+    ax.text(0.52, 21.5, "chance level (20%)", fontsize=8)
+    ax.axvline(res["meta"]["default_separation"], color=GREY, linestyle=":", linewidth=1.0)
+    ax.text(res["meta"]["default_separation"] + 0.06, 12.5, "default $s$", fontsize=8, color=GREY)
+    ax.set_xlabel("Class-separation parameter $s$")
+    ax.set_ylabel("Test accuracy (%)")
+    ax.set_ylim(10, 102)
+    ax.yaxis.grid(True, color="#dddddd", linewidth=0.7)
+    ax.set_axisbelow(True)
+    ax.legend(loc="center right", bbox_to_anchor=(0.97, 0.45), frameon=False, ncol=1)
+    save(fig, "fig_supp_sweep", formats, dpi)
+
+
+def fig_supp_learning(res, formats, dpi):
+    e5 = res["E5_learning_curve"]
+    fig, ax = plt.subplots(figsize=(FULL_WIDTH, 3.3))
+    for n, d in e5.items():
+        xs = [int(k) for k in d]
+        m = np.array([d[k]["mean"] for k in d])
+        sd = np.array([d[k]["sd"] for k in d])
+        ax.plot(xs, m, marker="o", ms=4.5, lw=1.6, color=SUPP_COLOURS[n], label=n)
+        ax.fill_between(xs, m - sd, m + sd, color=SUPP_COLOURS[n], alpha=0.15, linewidth=0)
+    ax.set_xscale("log")
+    ax.set_xticks([88, 175, 438, 875, 1750], ["88", "175", "438", "875", "1,750"])
+    ax.minorticks_off()
+    ax.set_xlabel("Training records")
+    ax.set_ylabel("Test accuracy (%)")
+    ax.yaxis.grid(True, color="#dddddd", linewidth=0.7)
+    ax.set_axisbelow(True)
+    ax.legend(loc="lower right", frameon=False)
+    save(fig, "fig_supp_learning_curve", formats, dpi)
+
+
+def fig_supp_order(res, formats, dpi):
+    e4 = res["E4_order"]["permutations"]
+    models_ = list(e4)
+    perms = list(next(iter(e4.values())))
+    rows, labels = [], []
+    for m in models_:
+        for mode, tag in (("evaluate_only", "evaluated only"), ("retrained", "retrained")):
+            rows.append([e4[m][p][mode]["mean"] for p in perms])
+            labels.append(f"{m}, {tag}")
+    mat = np.array(rows)
+    fig, ax = plt.subplots(figsize=(FULL_WIDTH, 4.0))
+    im = ax.imshow(mat, cmap="Blues", vmin=0, vmax=100, aspect="auto")
+    ax.set_xticks(range(len(perms)), [p.replace(" ", "\n", 1) for p in perms])
+    ax.set_yticks(range(len(labels)), labels)
+    for i in range(mat.shape[0]):
+        for j in range(mat.shape[1]):
+            ax.text(j, i, f"{mat[i, j]:.1f}", ha="center", va="center", fontsize=8.6,
+                    color="white" if mat[i, j] > 55 else DARK)
+    ax.set_xticks(np.arange(-.5, len(perms), 1), minor=True)
+    ax.set_yticks(np.arange(-.5, len(labels), 1), minor=True)
+    ax.grid(which="minor", color="white", linewidth=1.4)
+    ax.tick_params(which="both", length=0)
+    for sp in ax.spines.values():
+        sp.set_visible(False)
+    for k in range(1, len(models_)):
+        ax.axhline(2 * k - 0.5, color="white", linewidth=4)
+    cb = fig.colorbar(im, ax=ax, fraction=0.03, pad=0.02)
+    cb.set_label("Test accuracy (%)")
+    cb.outline.set_visible(False)
+    save(fig, "fig_supp_order", formats, dpi)
+
+
 def main():
     parser = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     parser.add_argument("--formats", nargs="+", default=["pdf", "png"], choices=["pdf", "png", "tiff", "svg"])
@@ -346,6 +454,13 @@ def main():
     for fn in (fig_workflow, fig_architecture, fig_confusion_single, fig_confusion_all, fig_perclass_f1,
                fig_model_comparison, fig_intervals, fig_order, fig_ablation):
         fn(args.formats, args.dpi)
+    supp = load_supp()
+    if supp is not None:
+        for fn in (fig_supp_baselines, fig_supp_sweep, fig_supp_order, fig_supp_learning):
+            fn(supp, args.formats, args.dpi)
+    else:
+        print("docs/supplementary_results.json not found: run scripts/run_supplementary_experiments.py first "
+              "to add the supplementary figures")
 
 
 if __name__ == "__main__":

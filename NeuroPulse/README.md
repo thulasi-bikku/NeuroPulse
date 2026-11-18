@@ -21,7 +21,12 @@ and nothing here is a medical device or may be used for diagnosis or treatment d
 | `scripts/make_figures.py` | Regenerates every figure from the reported results |
 | `scripts/make_docx.py` | Builds the Word version (`paper/NeuroPulse_manuscript.docx`) from the LaTeX source, with identical numbering and native Word equations |
 | `scripts/verify_reported_results.py` | Checks that every number printed in the paper is consistent with the reported counts |
-| `tests/` | 50 unit tests (33 for the input contract, 17 for metrics, models and reported results) |
+| `src/neuropulse/synthetic.py` | Documented reference generator used by the supplementary experiments (not the generator of the main dataset) |
+| `scripts/run_supplementary_experiments.py` | Six controlled experiments (baselines, difficulty sweep, negative controls, order perturbation, learning curves, channel neutralisation); ~8 min for 10 replicates |
+| `scripts/make_supplementary_tables.py` | Prints the LaTeX of the supplementary tables from `docs/supplementary_results.json` |
+| `scripts/check_references.py` | Checks every DOI in `paper/references.bib` against Crossref, including retraction status (needs internet) |
+| `docs/supplementary_results.json` | Stored results of the supplementary experiments |
+| `tests/` | 66 unit tests (33 input contract, 17 metrics/models/reported results, 12 reference generator, 4 reference checker) |
 | `docs/verification_report.txt` | Output of the consistency check |
 
 This package does **not** contain the Streamlit application, the trained model files or the dataset generator
@@ -36,7 +41,9 @@ pip install -r requirements.txt
 
 python -m unittest discover -s tests -v                 # unit tests
 python scripts/verify_reported_results.py               # consistency of reported numbers
+python scripts/run_supplementary_experiments.py         # optional, ~8 min; regenerates docs/supplementary_results.json
 python scripts/make_figures.py                          # figures -> paper/figures (PDF + 600 dpi PNG)
+python scripts/check_references.py                      # DOI and retraction check (internet required)
 cd paper && latexmk -pdf NeuroPulse_manuscript.tex      # manuscript PDF (also writes the .aux/.bbl the Word build needs)
 cd .. && python scripts/make_docx.py                     # Word version (needs pandoc >= 3.1 and python-docx)
 ```
